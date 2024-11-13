@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript Viewer</title>
+    <style>
+        /* Minimal modern CSS styling */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin: 0 0 1em;
+            text-align: center;
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        textarea {
+            resize: vertical;
+            height: 150px;
+        }
+        .message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Transcript Viewer</h1>
+        <input type="text" id="videoUrl" placeholder="Enter YouTube video URL" />
+        <button onclick="fetchTranscript()">Get Transcript</button>
+        <textarea id="transcript" readonly placeholder="Transcript will appear here..."></textarea>
+        <button onclick="copyTranscript()">Copy Transcript</button>
+        <div class="message" id="message"></div>
+    </div>
+    <script>
+        // Fetch transcript from backend
+        async function fetchTranscript() {
+            const videoUrl = document.getElementById("videoUrl").value;
+            const transcriptArea = document.getElementById("transcript");
+            const messageDiv = document.getElementById("message");
+            messageDiv.textContent = "Loading...";
+            try {
+                const result = await window.pywebview.api.fetch_transcript(videoUrl);
+                const data = JSON.parse(result);
+                transcriptArea.value = data.transcript || "No transcript available.";
+                messageDiv.textContent = "";
+            } catch (error) {
+                messageDiv.textContent = "Error fetching transcript.";
+            }
+        }
+
+        // Copy transcript to clipboard
+        async function copyTranscript() {
+            const transcript = document.getElementById("transcript").value;
+            const messageDiv = document.getElementById("message");
+            if (transcript) {
+                await window.pywebview.api.copy_to_clipboard(transcript);
+                messageDiv.textContent = "Transcript copied to clipboard.";
+            } else {
+                messageDiv.textContent = "No transcript to copy.";
+            }
+        }
+    </script>
+</body>
+</html>
